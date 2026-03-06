@@ -27,3 +27,7 @@ jobs:
     - name: Run ML pipeline
       run: |
         python pipeline/pipeline.py
+
+    - name: Check generated artifacts
+      run: |
+        ls -R  # Cela va lister tous les fichiers créés, y compris ton model.pkl

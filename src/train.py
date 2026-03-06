@@ -1,6 +1,7 @@
 import pandas as pd 
-from sklear.linear_model import LinearRegression
+from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import train_test_split
 import mlrun
 import joblib
 
@@ -29,8 +30,9 @@ def train_model(context, dataset):
     joblib.dump(model, "model.pkl")
 
     context.log_model(
-        "advertising-model"
+        "advertising-model",
         body=model,
-        model_file="model.pkl"
+        model_file="model.pkl",
+        metrics={"RMSE": rmse} # Optionnel : lie le score directement au modèle
     )
 

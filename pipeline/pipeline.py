@@ -11,5 +11,6 @@ train_fn = mlrun.code_to_function(
 )
 
 run = train_fn.run(
+    handler="train_model", # <--- Très important : nom de la fonction dans train.py
     inputs={"dataset": "data/Advertising.csv"}
 )
