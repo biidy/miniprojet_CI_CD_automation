@@ -5,7 +5,7 @@ mlrun.get_or_create_project("advertising-mlops")
 
 train_fn = mlrun.code_to_function(
     name="train-function",  # Soit tu le mets explicitement ici
-    filename="train.py",    # Assure-toi que le premier argument n'est pas déjà un string
+    filename="src/train.py",    # Assure-toi que le premier argument n'est pas déjà un string
     kind="job",
     image="mlrun/mlrun"
 )
