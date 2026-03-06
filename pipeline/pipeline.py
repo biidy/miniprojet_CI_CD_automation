@@ -1,6 +1,6 @@
 import mlrun
 
-project = mlrun.new_project("mon_projet", context="./")
+project = mlrun.new_project("projet1", context="./")
 mlrun.get_or_create_project("advertising-mlops")
 
 train_fn = mlrun.code_to_function(
