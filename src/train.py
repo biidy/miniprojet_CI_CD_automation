@@ -37,7 +37,7 @@ def train_model(context, dataset):
     predictions = model.predict(X_test)
 
     # Calcul du MSE d'abord
-    mse = mean_squared_error(y_test, predictions)
+    mse = mean_squared_error(Y_test, predictions)
     # Calcul du RMSE manuellement (plus robuste)
     rmse = np.sqrt(mse)
     #rmse= mean_squared_error(Y_test, predictions, squared=False)
