@@ -1,5 +1,8 @@
 import mlrun
 import os
+# On dit à MLRun : "Oublie le réseau, travaille uniquement sur le disque local"
+os.environ["MLRUN_DBPATH"] = "local"
+os.environ["MLRUN_ARTIFACT_PATH"] = "./artifacts"
 
 # 1. Configuration des chemins absolus (indispensable pour GitHub Actions)
 project_root = os.path.abspath("./")
