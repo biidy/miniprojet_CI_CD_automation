@@ -1,4 +1,5 @@
 import pandas as pd 
+import numpy as np # N'oublie pas d'ajouter l'import au début du fichier
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
@@ -35,9 +36,13 @@ def train_model(context, dataset):
 
     predictions = model.predict(X_test)
 
-    rmse= mean_squared_error(Y_test, predictions, squared=False)
+    # Calcul du MSE d'abord
+    mse = mean_squared_error(y_test, predictions)
+    # Calcul du RMSE manuellement (plus robuste)
+    rmse = np.sqrt(mse)
+    #rmse= mean_squared_error(Y_test, predictions, squared=False)
 
-    context.log_result("RMSE", rmse)
+    context.log_result("RMSE", float(rmse))
 
     joblib.dump(model, "model.pkl")
 
