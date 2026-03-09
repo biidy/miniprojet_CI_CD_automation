@@ -32,4 +32,17 @@ run = train_fn.run(
     local=True # Recommandé pour un mini-projet sans serveur distant
 )
 
-print(f"Pipeline terminé ! Les résultats sont ici : {artifact_path}")
+# 5. Déploiement du modèle (CD)
+# On crée la fonction de service
+serving_fn = mlrun.new_function("serving", kind="serving", image="mlrun/mlrun")
+
+# On lui ajoute le modèle qui vient d'être créé par 'run'
+serving_fn.add_model("advertising_v1", model_path=run.outputs['model'])
+
+# On enregistre la fonction dans le projet pour confirmer qu'elle est prête
+project.set_function(serving_fn)
+project.save()
+
+print(f"Mission accomplie ! Modèle entraîné et prêt pour le déploiement.")
+
+#print(f"Pipeline terminé ! Les résultats sont ici : {artifact_path}")
