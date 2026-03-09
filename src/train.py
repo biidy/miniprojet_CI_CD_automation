@@ -24,7 +24,7 @@ def train_model(context, dataset):
 
     # Préparation des données
     X = df.drop(target_col, axis=1)
-    y = df[target_col]
+    Y = df[target_col]
 
     X_train, X_test, Y_train, Y_test= train_test_split(
         X, Y, test_size=0.2, random_state=42)
