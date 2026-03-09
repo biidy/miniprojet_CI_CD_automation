@@ -6,7 +6,7 @@ import mlrun
 import joblib
 
 def train_model(context, dataset):
-    df = pd.read_csv(dataset)
+    df = dataset.as_df()
 
     if "Unnamed: 0" in df.columns:
         df=df.drop(columns=["Unnamed: 0"])
