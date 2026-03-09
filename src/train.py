@@ -6,13 +6,25 @@ import mlrun
 import joblib
 
 def train_model(context, dataset):
+    # Charger les données
     df = dataset.as_df()
+    
+    # NETTOYAGE : Supprimer les espaces dans les noms de colonnes et mettre en minuscule
+    df.columns = df.columns.str.strip().str.lower()
+    
+    # Log pour débugger dans GitHub Actions (tu verras les colonnes dans les logs)
+    context.logger.info(f"Colonnes détectées : {df.columns.tolist()}")
 
-    if "Unnamed: 0" in df.columns:
-        df=df.drop(columns=["Unnamed: 0"])
+    # Vérifier si 'sales' existe après nettoyage
+    if 'sales' not in df.columns:
+        # Si ça échoue encore, on prend la dernière colonne par défaut
+        target_col = df.columns[-1]
+    else:
+        target_col = 'sales'
 
-    X= df[["TV","Radio","Newspaper"]]
-    Y= df["sales"]
+    # Préparation des données
+    X = df.drop(target_col, axis=1)
+    y = df[target_col]
 
     X_train, X_test, Y_train, Y_test= train_test_split(
         X, Y, test_size=0.2, random_state=42)
