@@ -50,7 +50,7 @@ def train_model(context, dataset):
         "advertising-model",
         body=model,
         model_file="model.pkl",
-        metrics={"RMSE": float(rmse)} # Optionnel : lie le score directement au modèle
+        metrics={"RMSE": float(rmse)}, # Optionnel : lie le score directement au modèle
         labels={'framework': 'scikit-learn'}
     )
 
