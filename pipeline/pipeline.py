@@ -59,23 +59,25 @@ print("Mission accomplie ! Le pipeline de déploiement est prêt.")'''
 import mlrun
 import os
 
-# --- ÉTAPE 0 : Forcer le mode local AVANT tout ---
+# --- ÉTAPE 0 : Configuration de l'environnement local ---
+# On force MLRun à travailler sur le disque (pas d'API réseau)
 os.environ["MLRUN_DBPATH"] = "local"
-# On s'assure que MLRun utilise bien ce dossier pour stocker ses métadonnées
+# On définit le chemin absolu pour les artefacts
 os.environ["MLRUN_ARTIFACT_PATH"] = os.path.abspath("./artifacts")
 
-# 1. Configuration des chemins absolus
+# 1. Chemins et dossiers
 project_root = os.path.abspath("./")
 artifact_path = os.path.join(project_root, "artifacts")
 
 if not os.path.exists(artifact_path):
     os.makedirs(artifact_path)
 
-# 2. Initialisation du projet
+# 2. Initialisation du projet MLRun
 project = mlrun.get_or_create_project("advertising-mlops", context=project_root)
 project.artifact_path = artifact_path
 
-# 3. Définition de la fonction d'entraînement
+# 3. Définition de la fonction d'entraînement (CI)
+# On lie le code source (src/train.py) à une fonction MLRun
 train_fn = mlrun.code_to_function(
     name="train-function",
     filename="src/train.py",
@@ -83,7 +85,8 @@ train_fn = mlrun.code_to_function(
     image="mlrun/mlrun"
 )
 
-# 4. Exécution du Job (Entraînement)
+# 4. Exécution de l'entraînement
+# C'est ici que le modèle est créé et évalué
 run = train_fn.run(
     handler="train_model",
     inputs={"dataset": "data/Advertising.csv"},
@@ -92,25 +95,34 @@ run = train_fn.run(
 )
 
 # 5. Déploiement du modèle (CD)
-# On crée la fonction de serving
+# On prépare le serveur de prédiction
 serving_fn = mlrun.new_function("serving", kind="serving", image="mlrun/mlrun")
 
-# --- CORRECTION CRUCIALE ---
-# En mode local, run.outputs['model'] renvoie None. 
-# On utilise donc le chemin direct vers le fichier créé par ton script train.py
+# Chemin direct vers le fichier généré par ton script train.py
 model_file_path = os.path.join(artifact_path, "model.pkl")
 
+# On configure le serveur avec le modèle et la classe de service V2
 if os.path.exists(model_file_path):
-    # On passe le chemin local direct au lieu de l'objet run.outputs
-    serving_fn.add_model("advertising_v1", model_path=model_file_path)
-    print(f"✅ Succès : Modèle chargé depuis {model_file_path}")
+    serving_fn.add_model(
+        "advertising_v1", 
+        model_path=model_file_path,
+        class_name="mlrun.serving.V2ModelServer" # Indispensable pour le serving
+    )
+    print(f"✅ Modèle détecté et configuré : {model_file_path}")
 else:
-    # Backup au cas où le fichier est au dossier parent des artifacts
-    serving_fn.add_model("advertising_v1", model_path=artifact_path)
-    print(f"⚠️ Warning : Utilisation du dossier global {artifact_path}")
+    # Backup : utilise le dossier d'artefacts si le fichier n'est pas à la racine
+    serving_fn.add_model(
+        "advertising_v1", 
+        model_path=artifact_path,
+        class_name="mlrun.serving.V2ModelServer"
+    )
+    print(f"⚠️ Modèle configuré via le dossier : {artifact_path}")
 
-# On enregistre la configuration dans le projet
+# Enregistrement final dans le projet
 project.set_function(serving_fn)
 project.save()
 
-print("\n🚀 MISSION ACCOMPLIE ! Le pipeline CI/CD est validé de bout en bout.")
+print("\n" + "="*40)
+print("🚀 MISSION CI/CD ACCOMPLIE !")
+print("Le modèle est entraîné et le service de déploiement est prêt.")
+print("="*40)
