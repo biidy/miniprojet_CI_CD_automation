@@ -31,3 +31,9 @@ jobs:
     - name: Check generated artifacts
       run: |
         ls -R  # Cela va lister tous les fichiers créés, y compris ton model.pkl
+
+    - name: Upload Model Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: trained-model # Le nom du pack qu' on va télécharger
+        path: artifacts/train-function-train-model/0/advertising_model/model.pkl
