@@ -1,4 +1,4 @@
-name: MLRun CI Pipeline
+name: MLRun CI/CD Pipeline
 
 on:
   push:
@@ -6,14 +6,14 @@ on:
       - main
 
 jobs:
-  train-model:
-
+  train-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-
     - name: Checkout repository
       uses: actions/checkout@v3
+      with:
+        fetch-depth: 0 # Nécessaire pour pouvoir push vers Hugging Face ensuite
 
     - name: Setup Python
       uses: actions/setup-python@v4
@@ -30,10 +30,35 @@ jobs:
 
     - name: Check generated artifacts
       run: |
-        ls -R  # Cela va lister tous les fichiers créés, y compris ton model.pkl
+        ls -R 
 
-    - name: Upload Model Artifact
+    # Étape stratégique : on copie le modèle généré vers la racine 
+    # pour que le fichier app.py puisse le trouver facilement
+    - name: Prepare model for deployment
+      run: |
+        cp artifacts/train-function-train-model/0/advertising_model/model.pkl .
+
+    - name: Upload Model Artifact (GitHub)
       uses: actions/upload-artifact@v4
       with:
-        name: trained-model # Le nom du pack qu' on va télécharger
-        path: artifacts/train-function-train-model/0/advertising_model/model.pkl
+        name: trained-model
+        path: model.pkl
+
+    # ÉTAPE DE DÉPLOIEMENT CONTINU (CD)
+    - name: Push to Hugging Face
+      env:
+        HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      run: |
+        # Configuration de l'identité Git pour Hugging Face
+        git config --global user.email "action@github.com"
+        git config --global user.name "GitHub Action"
+        
+        # Ajout du dépôt distant (Remplace avec tes infos !)
+        # Format : https://username:token@huggingface.co/spaces/username/spacename
+        git remote add hf https://advertising-predict-pro:$HF_TOKEN@huggingface.co/spaces/advertising-predict-pro/advertising-prediction
+        
+        # On ajoute le modèle et l'app au commit
+        git add model.pkl
+        # On force le push vers la branche main de Hugging Face
+        git commit -m "Update model and app from GitHub Action" || echo "No changes to commit"
+        git push --force hf main
