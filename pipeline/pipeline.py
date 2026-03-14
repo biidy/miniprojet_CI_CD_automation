@@ -3,8 +3,7 @@
 import mlrun
 import os
 
-# --- ÉTAPE 0 : Configuration de l'environnement local ---
-# On force MLRun à travailler sur le disque (pas d'API réseau)
+#  ÉTAPE 0 : Configuration de l'environnement local
 os.environ["MLRUN_DBPATH"] = "local"
 # On définit le chemin absolu pour les artefacts
 os.environ["MLRUN_ARTIFACT_PATH"] = os.path.abspath("./artifacts")
@@ -50,9 +49,9 @@ if os.path.exists(model_file_path):
     serving_fn.add_model(
         "advertising_v1", 
         model_path=model_file_path,
-        class_name="mlrun.serving.V2ModelServer" # Indispensable pour le serving
+        class_name="mlrun.serving.V2ModelServer" 
     )
-    print(f"✅ Modèle détecté et configuré : {model_file_path}")
+    print(f" Modèle détecté et configuré : {model_file_path}")
 else:
     # Backup : utilise le dossier d'artefacts si le fichier n'est pas à la racine
     serving_fn.add_model(
@@ -60,13 +59,9 @@ else:
         model_path=artifact_path,
         class_name="mlrun.serving.V2ModelServer"
     )
-    print(f"⚠️ Modèle configuré via le dossier : {artifact_path}")
+    print(f"Modèle configuré via le dossier : {artifact_path}")
 
 # Enregistrement final dans le projet
 project.set_function(serving_fn)
 project.save()
-
-print("\n" + "="*40)
-print("🚀 MISSION CI/CD ACCOMPLIE !")
-print("Le modèle est entraîné et le service de déploiement est prêt.")
-print("="*40)
+print("modele entrainee")
