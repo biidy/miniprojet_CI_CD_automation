@@ -53,7 +53,7 @@ jobs:
         git config --global user.email "action@github.com"
         git config --global user.name "GitHub Action"
         
-        # Ajout du dépôt distant (Remplace avec tes infos !)
+        # Ajout du dépôt distant 
         # Format : https://username:token@huggingface.co/spaces/username/spacename
         git remote add hf https://advertising-predict-pro:$HF_TOKEN@huggingface.co/spaces/advertising-predict-pro/advertising-prediction
         
