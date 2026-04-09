@@ -8,18 +8,18 @@ os.environ["MLRUN_DBPATH"] = "local"
 # On définit le chemin absolu pour les artefacts
 os.environ["MLRUN_ARTIFACT_PATH"] = os.path.abspath("./artifacts")
 
-# 1. Chemins et dossiers
+# Chemins et dossiers
 project_root = os.path.abspath("./")
 artifact_path = os.path.join(project_root, "artifacts")
 
 if not os.path.exists(artifact_path):
     os.makedirs(artifact_path)
 
-# 2. Initialisation du projet MLRun
+# Initialisation du projet MLRun
 project = mlrun.get_or_create_project("advertising-mlops", context=project_root)
 project.artifact_path = artifact_path
 
-# 3. Définition de la fonction d'entraînement (CI)
+# Définition de la fonction d'entraînement (CI)
 # On lie le code source (src/train.py) à une fonction MLRun
 train_fn = mlrun.code_to_function(
     name="train-function",
@@ -28,7 +28,7 @@ train_fn = mlrun.code_to_function(
     image="mlrun/mlrun"
 )
 
-# 4. Exécution de l'entraînement
+# Exécution de l'entraînement
 # C'est ici que le modèle est créé et évalué
 run = train_fn.run(
     handler="train_model",
@@ -37,7 +37,7 @@ run = train_fn.run(
     local=True 
 )
 
-# 5. Déploiement du modèle (CD)
+# Déploiement du modèle (CD)
 
 serving_fn = mlrun.new_function("serving", kind="serving", image="mlrun/mlrun")
 
