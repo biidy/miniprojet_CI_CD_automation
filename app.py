@@ -31,9 +31,9 @@ def predict_sales(tv, radio, newspaper):
 interface = gr.Interface(
     fn=predict_sales,
     inputs=[
-        gr.Number(label="Budget Pub TV (Ariary)"),
-        gr.Number(label="Budget Pub Radio (Ariary)"),
-        gr.Number(label="Budget Pub Newspaper (Ariary)")
+        gr.Number(label="Budget Pour TV (Ariary)"),
+        gr.Number(label="Budget Pour Radio (Ariary)"),
+        gr.Number(label="Budget Pour Newspaper (Ariary)")
     ],
     outputs=gr.Textbox(label="Résultat"),
     title="📈 Prédiction du Chiffre d'Affaires",
