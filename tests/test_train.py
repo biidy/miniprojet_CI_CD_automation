@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import os
 from unittest.mock import MagicMock
+from unittest.mock import MagicMock, ANY
 from src.train import train_model
 
 def test_train_model_logic():
@@ -38,9 +39,9 @@ def test_train_model_logic():
     # Vérifie si le modèle a bien été enregistré dans MLRun
     mock_context.log_model.assert_called_with(
         'advertising_model',
-        body=pytest.any,
+        body=ANY,
         model_file='model.pkl',
-        metrics=pytest.any,
+        metrics=ANY,
         labels={'framework': 'scikit-learn'}
     )
 
