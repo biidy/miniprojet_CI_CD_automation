@@ -13,7 +13,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
       with:
-        fetch-depth: 0 # Nécessaire pour pouvoir push vers Hugging Face ensuite
+        fetch-depth: 0 
 
     - name: Setup Python
       uses: actions/setup-python@v4
@@ -23,20 +23,30 @@ jobs:
     - name: Install dependencies
       run: |
         pip install -r requirements.txt
+        pip install pytest
 
+    # --- ÉTAPE 1 : TESTS PRÉ-ENTRAÎNEMENT ---
+    # On vérifie que les données sont bonnes et que le code fonctionne
+    - name: Run Pre-Train Tests (Data & Logic)
+      run: |
+        pytest tests/test_data.py tests/test_train.py
+
+    # --- ÉTAPE 2 : EXÉCUTION DU PIPELINE ---
     - name: Run ML pipeline
       run: |
         python pipeline/pipeline.py
 
-    - name: Check generated artifacts
-      run: |
-        ls -R 
-
-    # Étape stratégique : on copie le modèle généré vers la racine 
-    # pour que le fichier app.py puisse le trouver facilement
+    # --- ÉTAPE 3 : PRÉPARATION DU MODÈLE ---
+    # On déplace le modèle avant de le tester pour simuler l'environnement réel
     - name: Prepare model for deployment
       run: |
         cp artifacts/train-function-train-model/0/advertising_model/model.pkl .
+
+    # --- ÉTAPE 4 : TESTS POST-ENTRAÎNEMENT ---
+    # On vérifie que le fichier model.pkl généré fait des prédictions cohérentes
+    - name: Run Post-Train Tests (Model Validation)
+      run: |
+        pytest tests/test_model.py
 
     - name: Upload Model Artifact (GitHub)
       uses: actions/upload-artifact@v4
@@ -44,21 +54,16 @@ jobs:
         name: trained-model
         path: model.pkl
 
-    # ÉTAPE DE DÉPLOIEMENT CONTINU (CD)
+    # --- ÉTAPE 5 : DÉPLOIEMENT ---
     - name: Push to Hugging Face
       env:
         HF_TOKEN: ${{ secrets.HF_TOKEN }}
       run: |
-        # Configuration de l'identité Git pour Hugging Face
         git config --global user.email "action@github.com"
         git config --global user.name "GitHub Action"
         
-        # Ajout du dépôt distant 
-        # Format : https://username:token@huggingface.co/spaces/username/spacename
         git remote add hf https://advertising-predict-pro:$HF_TOKEN@huggingface.co/spaces/advertising-predict-pro/advertising-prediction
         
-        # On ajoute le modèle et l'app au commit
         git add model.pkl
-        # On force le push vers la branche main de Hugging Face
         git commit -m "Update model and app from GitHub Action" || echo "No changes to commit"
         git push --force hf main
